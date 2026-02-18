@@ -44,6 +44,41 @@ If you clone or link this repo as `opencircom` in your project root, compile wit
 circom your.circom --r1cs --wasm -o build -l opencircom/circuits
 ```
 
+## Include in Hardhat or Foundry
+
+### Install
+
+From npm:
+
+```bash
+npm install opencircom
+```
+
+Or add to your `package.json`: `"opencircom": "^0.1.0"`.
+
+### Hardhat
+
+1. Add `opencircom` as a dependency (see Install).
+2. In your Circom build step (e.g. Hardhat plugin or script), pass the package circuits as the include path:
+
+   ```bash
+   circom circuits/YourCircuit.circom --r1cs --wasm -o build -l node_modules/opencircom/circuits
+   ```
+
+3. Use snarkjs (or your flow) to generate the verifier contract; deploy or import it in your Hardhat tests.
+
+### Foundry
+
+1. Add `opencircom` via npm (`npm install opencircom`) or as a Git submodule:
+   ```bash
+   git submodule add https://github.com/jose-blockchain/opencircom.git lib/opencircom
+   ```
+2. In a script, run `circom` with the opencircom circuits on the include path:
+   - npm: `-l node_modules/opencircom/circuits`
+   - submodule: `-l lib/opencircom/circuits`
+3. Use snarkjs (or circom) to generate the Solidity verifier; put the generated `.sol` in `src/`.
+4. Run `forge build` and `forge test`; your Solidity code calls the verifier contract as usual.
+
 ## Circuits
 
 | Category   | Template                 | Description |
