@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Circom](https://img.shields.io/badge/Circom-ZK%20Circuits-8B5CF6)](https://docs.circom.io/)
-[![Tests](https://img.shields.io/badge/tests-64%2B%20passing-success)](./test)
+[![Tests](https://img.shields.io/badge/tests-79%2B%20passing-success)](./test)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.x-brightgreen)](https://nodejs.org/)
 [![No circomlib](https://img.shields.io/badge/deps-no%20circomlib-informational)](./circuits)
 
@@ -54,7 +54,7 @@ From npm:
 npm install opencircom
 ```
 
-Or add to your `package.json`: `"opencircom": "^0.1.0"`.
+Or add to your `package.json`: `"opencircom": "^0.2.0"`.
 
 ### Hardhat
 
@@ -85,11 +85,17 @@ Or add to your `package.json`: `"opencircom": "^0.1.0"`.
 |-----------|--------------------------|-------------|
 | Hashing   | `Poseidon(nInputs)`      | Hades Poseidon (configurable width). |
 | Hashing   | `MiMC7(nrounds)`, `MultiMiMC7(nInputs, nRounds)` | MiMC-7. |
+| Hashing   | `Sha256(nBits)`  | SHA-256 (FIPS 180-4). Input length in bits; padding is applied. |
 | Comparators | `LessThan(n)`, `GreaterThan(n)`, `IsEqual()`, `IsZero()` | Range and equality. |
+| Comparators | `StrictNum2Bits(n)` | Num2Bits with in ∈ [0, 2^n−1] enforced. |
+| Comparators | `RangeProof(n)` | Prove a ≤ x ≤ b (inputs x, a, b; n-bit range). |
 | Bitify    | `Num2Bits(n)`, `Bits2Num(n)` | Bit decomposition (see also `compconstant.circom`, `aliascheck.circom`). |
 | Gates     | `AND`, `OR`, `NOT`, `XOR`, `MultiAND(n)` | Boolean gates. |
 | Utils     | `Mux1`, `Mux2`, `Switcher` | Multiplexer and conditional swap. |
 | Merkle    | `MerkleInclusionProof(levels)` | Binary Merkle inclusion. |
+| Merkle    | `SparseMerkleInclusion(levels)`, `SparseMerkleExclusion(levels)` | Sparse Merkle: prove leaf at key equals value, or is empty. |
+| Merkle    | `IncrementalMerkleInclusion(levels)` | Append-only tree: prove leaf at numeric index. |
+| Merkle    | `MerkleUpdateProof(levels)` | Prove old root → new root by changing one leaf on the same path. |
 | Identity  | `Nullifier(domainSize)`  | Nullifier hash for double-spend prevention. |
 | Voting    | `VoteCommit(numChoices)`, `VoteReveal()` | Commit-reveal (commit phase + reveal with ZK), anonymous 1-of-N vote, tally verification, double-vote prevention (nullifier-based). |
 
@@ -97,10 +103,10 @@ Or add to your `package.json`: `"opencircom": "^0.1.0"`.
 
 Planned or community-requested templates (not yet implemented):
 
-- **Hashing**: Pedersen, SHA-256 (in-circuit), Keccak-256.
+- **Hashing**: Pedersen (Baby Jubjub), Keccak-256.
 - **Signatures**: EdDSA verify (Baby JubJub), ECDSA verify (secp256k1).
-- **Merkle**: Sparse Merkle tree (inclusion + exclusion), incremental Merkle tree, Merkle update proof.
-- **Comparators & range**: Range proof (value in [a, b]), strict Num2Bits with range enforcement.
+- **Merkle**: (Sparse inclusion/exclusion, incremental, update proof are implemented.)
+- **Comparators & range**: (Range proof and StrictNum2Bits are implemented.)
 - **Arithmetic**: Safe division with remainder, modular exponentiation, sum/inner product, aliasing-safe field checks.
 - **Encryption**: ElGamal encrypt/decrypt, ECDH shared secret, symmetric (Poseidon-based).
 - **Identity & credentials**: Semaphore-style identity commitment, selective attribute disclosure, age/threshold proof (attribute > N without revealing).
@@ -124,7 +130,7 @@ See [SECURITY.md](SECURITY.md) for more.
 
 Tests use **real** ZK where applicable: circuits are compiled with Circom, then a small Powers of Tau and zkey are generated, and a Groth16 proof is created and verified with snarkjs (no mocks).
 
-**Coverage** (64+ tests): Poseidon (constraints, determinism, large inputs, full prove/verify), Comparators (LessThan, IsEqual, LessEqThan, GreaterThan, GreaterEqThan, IsZero, boundaries), Gates (XOR, AND, OR, NOT, multiple combos), Bitify (Num2Bits/Bits2Num round-trip for 0, 1, 42, 127, 128, 255), Merkle (inclusion proof, path indices, determinism), MiMC (constraints, determinism), Mux1/Mux2, Switcher, Nullifier (determinism, distinct inputs), Voting (VoteCommit, VoteReveal, commit-reveal flow, double-vote prevention), and one full Groth16 prove/verify.
+**Coverage** (79+ tests): Poseidon, SHA-256, Comparators (incl. StrictNum2Bits, RangeProof), Gates, Bitify, Merkle (inclusion, sparse, incremental, update), MiMC, Mux1/Mux2, Switcher, Nullifier, Voting, and one full Groth16 prove/verify.
 
 ```bash
 npm install
