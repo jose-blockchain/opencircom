@@ -79,6 +79,15 @@ Or add to your `package.json`: `"opencircom": "^0.2.0"`.
 3. Use snarkjs (or circom) to generate the Solidity verifier; put the generated `.sol` in `src/`.
 4. Run `forge build` and `forge test`; your Solidity code calls the verifier contract as usual.
 
+### Boilerplates
+
+Starter repos that wire opencircom with a build pipeline and verifier contracts:
+
+- **opencircom-hardhat-boilerplate** — Circom + snarkjs + Hardhat; compile circuits, generate verifier, test from JS.
+- **opencircom-foundry-boilerplate** — Circom + snarkjs + Foundry; verifier in `src/`, `forge test` for Solidity tests.
+
+Use them to jump-start a project without configuring the toolchain from scratch.
+
 ## Circuits
 
 | Category   | Template                 | Description |
