@@ -1,0 +1,14 @@
+# Changelog
+
+## 0.2.0
+
+- Voting circuits: vote_commit, vote_reveal
+- Merkle: merkle_inclusion and related helpers
+- JS export: circuitsDir and circuits (hashing, merkle) for tooling
+
+## 0.1.0
+
+- Initial release
+- Hashing: Poseidon, MiMC, SHA-256 (full compression chain)
+- Primitives: comparators, bitify, gates, mux, switcher, compconstant, binsum, aliascheck
+- No circomlib dependency
