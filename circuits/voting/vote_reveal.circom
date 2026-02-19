@@ -3,8 +3,19 @@ pragma circom 2.0.0;
 include "../hashing/poseidon.circom";
 include "../merkle/merkle_inclusion.circom";
 
-// Reveal phase: prove (choice, identity, salt, ballotId) match commitment and compute nullifier for double-vote prevention.
-// Nullifier = H(H(identity, salt), ballotId). Contract checks commitment was in set and nullifier not yet spent.
+/**
+ * @title VoteReveal
+ * @notice Reveal phase: proves (choice, identity, salt, ballotId) match commitment and outputs nullifier for double-vote prevention.
+ * @dev Nullifier = H(H(identity, salt), ballotId). Contract must check commitment was in the committed set and nullifier not yet spent.
+ * @custom:input choice Voter's choice.
+ * @custom:input identity Voter identity.
+ * @custom:input salt Salt (must match commit phase).
+ * @custom:input ballotId Ballot identifier.
+ * @custom:input commitment Commitment (must equal H(choice, identity, salt, ballotId)).
+ * @custom:output nullifierHash Nullifier hash for double-vote prevention.
+ * @custom:complexity Poseidon(4) + Poseidon(2) + Nullifier(1): ~780 constraints. Dominated by hashes.
+ * @custom:security Contract must verify commitment was in committed set and nullifier not already spent. Same (identity, salt, ballotId) yields same nullifier (double-vote detection).
+ */
 template VoteReveal() {
     signal input choice;
     signal input identity;

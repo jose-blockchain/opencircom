@@ -164,6 +164,16 @@ template PoseidonEx(nInputs, nOuts) {
     }
 }
 
+/**
+ * @title Poseidon
+ * @notice Hades Poseidon hash (same spec as circomlib, no dependency).
+ * @dev Configurable input width. Constants in poseidon_constants.circom. Use for Merkle trees, nullifiers, commitments.
+ * @param nInputs Number of input field elements.
+ * @custom:input inputs[nInputs] Field elements to hash.
+ * @custom:output out Single field element output.
+ * @custom:complexity Depends on nInputs: Hades permutation (Sigma, Ark, Mix rounds). ~261 constraints for nInputs=3; ~297 for 4. Dominant in Merkle/nullifier circuits.
+ * @custom:security Same spec as circomlib Poseidon; constants in poseidon_constants.circom. Use for commitments, Merkle, nullifiers; not for collision resistance outside ZK.
+ */
 template Poseidon(nInputs) {
     signal input inputs[nInputs];
     signal output out;

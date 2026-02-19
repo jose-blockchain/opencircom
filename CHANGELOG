@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+- Arithmetic: Sum(n), InnerProduct(n), DivRem(n), ExpByBits(n) — sum, dot product, safe div/rem, field exponentiation
+- Comparators: AssertNotEqual() — aliasing-safe (constrain a ≠ b)
+- Utils: SelectByIndex(N, nBits), PadBits(n, target), OneOfN(n)
+
 ## 0.2.0
 
 - Voting circuits: vote_commit, vote_reveal

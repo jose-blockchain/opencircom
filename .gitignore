@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build and test artifacts
+build/
+test/build/
+
+# Generated documentation (npm run docs)
+docs/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs and debug
+*.log
+npm-debug.log*
+.npm
+
+# Optional: uncomment if you don't want to commit IDE settings
+# .idea/
+# .vscode/

@@ -26,4 +26,10 @@ circom test/circuits/incremental_merkle_test.circom --r1cs --wasm -o build -l ci
 circom test/circuits/merkle_update_test.circom --r1cs --wasm -o build -l circuits
 circom test/circuits/strict_num2bits_test.circom --r1cs --wasm -o build -l circuits
 circom test/circuits/range_proof_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/arithmetic_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/muxn_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/divrem_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/utils_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/exp_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/assert_not_equal_test.circom --r1cs --wasm -o build -l circuits
 echo "Done."

@@ -4,9 +4,18 @@ include "../hashing/poseidon.circom";
 include "../switcher.circom";
 include "../bitify.circom";
 
-// Binary Merkle inclusion proof. Proves leaf is in tree with root, using pathElements and pathIndices.
-// pathIndex[i]=0 => current is left child; pathIndex[i]=1 => current is right child.
-// Uses Poseidon(2) per level. Combine with nullifier for double-spend prevention.
+/**
+ * @title MerkleInclusionProof
+ * @notice Proves that leaf is in a binary Merkle tree with the given root.
+ * @dev pathIndices[i]=0 means current node is left child, 1 means right. Uses Poseidon(2) per level. Combine with Nullifier for double-spend prevention.
+ * @param levels Tree depth (number of path elements).
+ * @custom:input leaf Leaf value to prove.
+ * @custom:input pathElements[levels] Sibling hashes along the path.
+ * @custom:input pathIndices[levels] Direction bits (0=left, 1=right).
+ * @custom:output root Computed root (must match public root).
+ * @custom:complexity O(levels): (levels+1)×Poseidon(1 or 2), levels×Switcher. ~697 constraints for levels=2 (Poseidon cost dominates).
+ * @custom:security pathIndices constrained binary. Combine with Nullifier for double-spend prevention; verify root on-chain.
+ */
 template MerkleInclusionProof(levels) {
     signal input leaf;
     signal input pathElements[levels];
@@ -38,8 +47,16 @@ template MerkleInclusionProof(levels) {
     root <== computed[levels];
 }
 
-// Sparse Merkle inclusion: prove that the leaf at key (pathIndices) has the given value.
-// Same as MerkleInclusionProof; use with a fixed empty-leaf convention for sparse trees.
+/**
+ * @title SparseMerkleInclusion
+ * @notice Proves that the leaf at key (pathIndices) equals the given value in a sparse Merkle tree.
+ * @dev Same as MerkleInclusionProof; use a fixed empty-leaf convention (e.g. 0) for sparse trees.
+ * @param levels Tree depth.
+ * @custom:input leaf Value at the key.
+ * @custom:input pathElements[levels] Path siblings.
+ * @custom:input pathIndices[levels] Key bits.
+ * @custom:output root Merkle root.
+ */
 template SparseMerkleInclusion(levels) {
     signal input leaf;
     signal input pathElements[levels];
@@ -54,7 +71,15 @@ template SparseMerkleInclusion(levels) {
     root <== incl.root;
 }
 
-// Sparse Merkle exclusion: prove that the leaf at key (pathIndices) is empty (no value).
+/**
+ * @title SparseMerkleExclusion
+ * @notice Proves that the leaf at key (pathIndices) is empty in a sparse Merkle tree.
+ * @dev Uses MerkleInclusionProof with leaf = 0.
+ * @param levels Tree depth.
+ * @custom:input pathElements[levels] Path siblings.
+ * @custom:input pathIndices[levels] Key bits.
+ * @custom:output root Merkle root.
+ */
 template SparseMerkleExclusion(levels) {
     signal input pathElements[levels];
     signal input pathIndices[levels];
@@ -68,8 +93,16 @@ template SparseMerkleExclusion(levels) {
     root <== incl.root;
 }
 
-// Incremental (append-only) Merkle inclusion: prove leaf at index is in the tree.
-// pathIndices are derived from index (index as bits). Use for deposit-style trees.
+/**
+ * @title IncrementalMerkleInclusion
+ * @notice Proves leaf at numeric index is in an append-only Merkle tree.
+ * @dev pathIndices are derived from index (Num2Bits). Use for deposit-style trees where index is insertion order.
+ * @param levels Tree depth.
+ * @custom:input leaf Leaf value.
+ * @custom:input index Numeric index of the leaf.
+ * @custom:input pathElements[levels] Path siblings.
+ * @custom:output root Merkle root.
+ */
 template IncrementalMerkleInclusion(levels) {
     signal input leaf;
     signal input index;
@@ -86,7 +119,18 @@ template IncrementalMerkleInclusion(levels) {
     root <== incl.root;
 }
 
-// Merkle update proof: prove newRoot is oldRoot with one leaf updated at key (pathIndices).
+/**
+ * @title MerkleUpdateProof
+ * @notice Proves newRoot is oldRoot with one leaf updated at the same path.
+ * @dev Constrains two inclusion proofs (oldLeaf→oldRoot, newLeaf→newRoot) with same pathElements and pathIndices.
+ * @param levels Tree depth.
+ * @custom:input oldRoot Previous root.
+ * @custom:input newRoot Root after update.
+ * @custom:input oldLeaf Leaf value before.
+ * @custom:input newLeaf Leaf value after.
+ * @custom:input pathElements[levels] Path siblings.
+ * @custom:input pathIndices[levels] Key bits.
+ */
 template MerkleUpdateProof(levels) {
     signal input oldRoot;
     signal input newRoot;
@@ -110,7 +154,17 @@ template MerkleUpdateProof(levels) {
     inclNew.root === newRoot;
 }
 
-// Nullifier = H(secret, externalNullifier). Use with MerkleInclusionProof for anonymous spend.
+/**
+ * @title Nullifier
+ * @notice Nullifier hash for double-spend prevention: H(secret, externalNullifier).
+ * @dev Uses Poseidon(2). Use a unique externalNullifier per action. Combine with MerkleInclusionProof for anonymous spend.
+ * @param domainSize Unused; for API compatibility.
+ * @custom:input secret Prover's secret.
+ * @custom:input externalNullifier Action identifier (unique per action).
+ * @custom:output nullifierHash Poseidon(secret, externalNullifier).
+ * @custom:complexity 1× Poseidon(2): ~240 constraints (Poseidon cost).
+ * @custom:security Use a unique externalNullifier per action to prevent cross-action replay. Keep secret unknown; nullifier reveals double-use only.
+ */
 template Nullifier(domainSize) {
     signal input secret;
     signal input externalNullifier;

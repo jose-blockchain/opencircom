@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Circom](https://img.shields.io/badge/Circom-ZK%20Circuits-8B5CF6)](https://docs.circom.io/)
-[![Tests](https://img.shields.io/badge/tests-79%2B%20passing-success)](./test)
+[![Tests](https://img.shields.io/badge/tests-108%2B%20passing-success)](./test)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.x-brightgreen)](https://nodejs.org/)
 [![No circomlib](https://img.shields.io/badge/deps-no%20circomlib-informational)](./circuits)
 
@@ -54,7 +54,7 @@ From npm:
 npm install opencircom
 ```
 
-Or add to your `package.json`: `"opencircom": "^0.2.0"`.
+Or add to your `package.json`: `"opencircom": "^0.3.0"`.
 
 ### Hardhat
 
@@ -88,6 +88,10 @@ Starter repos that wire opencircom with a build pipeline and verifier contracts:
 
 Use them to jump-start a project without configuring the toolchain from scratch.
 
+## Documentation
+
+Generated API-style docs for each circuit category and template: **[docs/](./docs/README.md)**. Build with `npm run docs` (parses OpenZeppelin-style `@title`, `@notice`, `@dev`, `@param`, `@custom:input`, `@custom:output` block comments in the circuits).
+
 ## Circuits
 
 | Category   | Template                 | Description |
@@ -95,18 +99,26 @@ Use them to jump-start a project without configuring the toolchain from scratch.
 | Hashing   | `Poseidon(nInputs)`      | Hades Poseidon (configurable width). |
 | Hashing   | `MiMC7(nrounds)`, `MultiMiMC7(nInputs, nRounds)` | MiMC-7. |
 | Hashing   | `Sha256(nBits)`  | SHA-256 (FIPS 180-4). Input length in bits; padding is applied. |
-| Comparators | `LessThan(n)`, `GreaterThan(n)`, `IsEqual()`, `IsZero()` | Range and equality. |
+| Comparators | `LessThan(n)`, `GreaterThan(n)`, `IsEqual()`, `IsZero()`, `AssertNotEqual()` | Range, equality, aliasing-safe (force a ≠ b). |
 | Comparators | `StrictNum2Bits(n)` | Num2Bits with in ∈ [0, 2^n−1] enforced. |
 | Comparators | `RangeProof(n)` | Prove a ≤ x ≤ b (inputs x, a, b; n-bit range). |
 | Bitify    | `Num2Bits(n)`, `Bits2Num(n)` | Bit decomposition (see also `compconstant.circom`, `aliascheck.circom`). |
 | Gates     | `AND`, `OR`, `NOT`, `XOR`, `MultiAND(n)` | Boolean gates. |
-| Utils     | `Mux1`, `Mux2`, `Switcher` | Multiplexer and conditional swap. |
+| Utils     | `Mux1`, `Mux2`, `MuxN` / `SelectByIndex(N, nBits)`, `Switcher` | Multiplexer and conditional swap; N-way select by index. |
+| Arithmetic | `Sum(n)`, `InnerProduct(n)`, `DivRem(n)`, `ExpByBits(n)` | Sum, dot product; safe div/rem; field exponentiation (exp as bits). |
+| Utils      | `PadBits(n, target)`, `OneOfN(n)` | Zero-pad bit array to length; 1 if value in array. |
 | Merkle    | `MerkleInclusionProof(levels)` | Binary Merkle inclusion. |
 | Merkle    | `SparseMerkleInclusion(levels)`, `SparseMerkleExclusion(levels)` | Sparse Merkle: prove leaf at key equals value, or is empty. |
 | Merkle    | `IncrementalMerkleInclusion(levels)` | Append-only tree: prove leaf at numeric index. |
 | Merkle    | `MerkleUpdateProof(levels)` | Prove old root → new root by changing one leaf on the same path. |
 | Identity  | `Nullifier(domainSize)`  | Nullifier hash for double-spend prevention. |
 | Voting    | `VoteCommit(numChoices)`, `VoteReveal()` | Commit-reveal (commit phase + reveal with ZK), anonymous 1-of-N vote, tally verification, double-vote prevention (nullifier-based). |
+
+## Circuits (implemented)
+
+Roadmap areas fully covered:
+
+- **Arithmetic**: Sum(n), InnerProduct(n), DivRem(n) (safe division with remainder), ExpByBits(n) (field/modular-style exponentiation), AssertNotEqual() (aliasing-safe field checks).
 
 ## Potential circuits to add (roadmap)
 
@@ -116,13 +128,12 @@ Planned or community-requested templates (not yet implemented):
 - **Signatures**: EdDSA verify (Baby JubJub), ECDSA verify (secp256k1).
 - **Merkle**: (Sparse inclusion/exclusion, incremental, update proof are implemented.)
 - **Comparators & range**: (Range proof and StrictNum2Bits are implemented.)
-- **Arithmetic**: Safe division with remainder, modular exponentiation, sum/inner product, aliasing-safe field checks.
 - **Encryption**: ElGamal encrypt/decrypt, ECDH shared secret, symmetric (Poseidon-based).
 - **Identity & credentials**: Semaphore-style identity commitment, selective attribute disclosure, age/threshold proof (attribute > N without revealing).
 - **Set membership**: Merkle-based allowlist, non-membership proof (sparse Merkle), accumulator-based membership.
 - **Payments & finance**: Balance proof (balance ≥ amount without revealing), confidential transfer, mixer (deposit/withdraw).
 - **String & data**: Regex matching (in-circuit), JSON field extraction, UTF-8 validation, substring search.
-- **Utilities**: MuxN, array contains / index of, padding (PKCS, zero-pad).
+- **Utilities**: (MuxN/SelectByIndex, OneOfN/array contains, PadBits/zero-pad implemented.) Index of, PKCS padding.
 
 Contributions welcome; open an issue to propose or prioritize.
 
@@ -139,7 +150,7 @@ See [SECURITY.md](SECURITY.md) for more.
 
 Tests use **real** ZK where applicable: circuits are compiled with Circom, then a small Powers of Tau and zkey are generated, and a Groth16 proof is created and verified with snarkjs (no mocks).
 
-**Coverage** (79+ tests): Poseidon, SHA-256, Comparators (incl. StrictNum2Bits, RangeProof), Gates, Bitify, Merkle (inclusion, sparse, incremental, update), MiMC, Mux1/Mux2, Switcher, Nullifier, Voting, and one full Groth16 prove/verify.
+**Coverage** (108+ tests): Poseidon, SHA-256, Comparators (incl. StrictNum2Bits, RangeProof, AssertNotEqual), Gates, Bitify, Merkle (inclusion, sparse, incremental, update), MiMC, Mux1/Mux2, MuxN (SelectByIndex), Arithmetic (Sum, InnerProduct, DivRem, ExpByBits), Utils (PadBits, OneOfN), Switcher, Nullifier, Voting, and one full Groth16 prove/verify.
 
 ```bash
 npm install

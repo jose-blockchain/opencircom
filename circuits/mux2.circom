@@ -1,5 +1,14 @@
 pragma circom 2.0.0;
 
+/**
+ * @title MultiMux2
+ * @notice 4-to-1 multiplexer for n parallel signals; selector s[2] (2 bits).
+ * @dev out[i] = c[i][s[0] + 2*s[1]]. Constraint count O(n).
+ * @param n Number of parallel channels.
+ * @custom:input c[n][4] Four choices per channel.
+ * @custom:input s[2] Selector bits (0..3).
+ * @custom:output out[n] Selected value per channel.
+ */
 template MultiMux2(n) {
     signal input c[n][4];
     signal input s[2];
@@ -19,6 +28,14 @@ template MultiMux2(n) {
     }
 }
 
+/**
+ * @title Mux2
+ * @notice Single 4-to-1 multiplexer: out = c[s[0] + 2*s[1]].
+ * @dev Wrapper of MultiMux2(1).
+ * @custom:input c[4] Four choices.
+ * @custom:input s[2] Selector bits.
+ * @custom:output out Selected value.
+ */
 template Mux2() {
     signal input c[4];
     signal input s[2];
