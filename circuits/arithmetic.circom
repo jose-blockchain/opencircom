@@ -66,8 +66,8 @@ template InnerProduct(n) {
  * @custom:input r Remainder (prover-supplied).
  * @custom:output quotient Same as q (for wiring).
  * @custom:output remainder Same as r (for wiring).
- * @custom:complexity O(n): 4 StrictNum2Bits(n), 1 LessThan(n+1), 1 IsZero; ~118 constraints for n=16.
- * @custom:security Prover can lie if q,r not computed correctly; circuit only checks a=b*q+r and 0<=r<b. Use for known divisor/remainder patterns.
+ * @custom:complexity O(n): 5 StrictNum2Bits(n), 1 LessThan(n+1), 1 IsZero; ~135 constraints for n=16.
+ * @custom:security All of a, b, q, r are range-checked to n-bit. Circuit checks a=b*q+r and 0<=r<b.
  */
 template DivRem(n) {
     assert(n <= 251);
@@ -83,6 +83,8 @@ template DivRem(n) {
     bNonZero.in <== b;
     bNonZero.out === 0;
     a === b * q + r;
+    component strictA = StrictNum2Bits(n);
+    strictA.in <== a;
     component strictB = StrictNum2Bits(n);
     strictB.in <== b;
     component strictQ = StrictNum2Bits(n);

@@ -1,17 +1,24 @@
 {
   "name": "opencircom",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Reusable Circom ZK circuit templates — hashing, comparators, Merkle trees, and more. No dependency on circomlib.",
   "main": "index.js",
   "files": ["circuits", "index.js"],
   "scripts": {
     "setup:zk": "bash scripts/setup_zk_tests.sh",
     "test": "npm run setup:zk && mocha test/*.js --timeout 120000",
-"compile:test": "bash scripts/compile_test_circuits.sh",
+    "compile:test": "bash scripts/compile_test_circuits.sh",
     "docs": "node scripts/gen_docs.js"
   },
   "keywords": ["circom", "zk", "zero-knowledge", "snark", "poseidon", "merkle", "circuit"],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jose-blockchain/opencircom.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "devDependencies": {
     "chai": "^4.3.10",
     "circom_tester": "^0.0.21",

@@ -298,3 +298,119 @@ template Tally(numChoices, numVotes) {
         count[c] <== cnt[c].out;
     }
 }
+
+/**
+ * @title PadBits10Star
+ * @notice Pads a bit array with 1 then zeros to total length (common in hash padding).
+ * @dev out[0..n-1]=in, out[n]=1, out[n+1..totalBits-1]=0. totalBits >= n+1.
+ * @param n Input bit length.
+ * @param totalBits Output length.
+ */
+template PadBits10Star(n, totalBits) {
+    assert(n >= 1 && totalBits >= n + 1);
+    signal input in[n];
+    signal output out[totalBits];
+    for (var i = 0; i < n; i++) {
+        in[i] * (in[i] - 1) === 0;
+        out[i] <== in[i];
+    }
+    out[n] <== 1;
+    for (var i = n + 1; i < totalBits; i++) {
+        out[i] <== 0;
+    }
+}
+
+/**
+ * @title ConditionalSelect
+ * @notice Outputs a if condition=1, else b (condition must be 0 or 1).
+ * @dev Uses SelectByIndex(2,1). Useful for private if-then-else.
+ */
+template ConditionalSelect() {
+    signal input condition;
+    signal input a;
+    signal input b;
+    signal output out;
+    condition * (condition - 1) === 0;
+    component sel = SelectByIndex(2, 1);
+    sel.inputs[0] <== a;
+    sel.inputs[1] <== b;
+    sel.index <== 1 - condition;
+    out <== sel.out;
+}
+
+/**
+ * @title BalanceProof
+ * @notice Proves balance >= amount and newBalance = balance - amount (all n-bit non-negative).
+ * @dev Use in contracts: verify proof then execute transfer (deduct amount).
+ * @param n Bit width for amounts.
+ */
+template BalanceProof(n) {
+    assert(n >= 1 && n <= 251);
+    signal input balance;
+    signal input amount;
+    signal input newBalance;
+    component rp1 = RangeProof(n);
+    rp1.x <== balance;
+    rp1.a <== amount;
+    rp1.b <== (1 << n) - 1;
+    component rp2 = RangeProof(n);
+    rp2.x <== newBalance;
+    rp2.a <== 0;
+    rp2.b <== (1 << n) - 1;
+    balance - amount === newBalance;
+}
+
+/**
+ * @title VoteInAllowlist
+ * @notice Returns 1 if vote equals one of allowedChoices (for allowlist-style voting).
+ * @dev Same as OneOfN(n); name clarifies voting use. Combine with tally in contracts.
+ */
+template VoteInAllowlist(n) {
+    assert(n >= 1);
+    signal input vote;
+    signal input allowedChoices[n];
+    signal output out;
+    component oneOf = OneOfN(n);
+    for (var i = 0; i < n; i++) {
+        oneOf.arr[i] <== allowedChoices[i];
+    }
+    oneOf.value <== vote;
+    out <== oneOf.out;
+}
+
+/**
+ * @title PadPKCS7
+ * @notice PKCS#7-style padding: constrains block so bytes from index numUsed to end equal (blockBytes - numUsed).
+ * @dev Useful for hashing/symmetric crypto in-circuit. Prover supplies full block; circuit enforces padding.
+ * @param blockBytes Block size in bytes (e.g. 8, 16). blockBytes <= 255.
+ * @custom:input block[blockBytes] Full block (each byte 0-255).
+ * @custom:input numUsed Number of message bytes at start (0..blockBytes-1). At least 1 pad byte is always required (standard PKCS#7).
+ * @custom:complexity blockBytes * (StrictNum2Bits(8) + LessEqThan(nBits) + 1) + range check on numUsed.
+ */
+template PadPKCS7(blockBytes) {
+    assert(blockBytes >= 1 && blockBytes <= 255);
+    var nBits = 1;
+    var t = 1;
+    while (t <= blockBytes) {
+        t = t * 2;
+        nBits = nBits + 1;
+    }
+    signal input block[blockBytes];
+    signal input numUsed;
+    component strictNumUsed = StrictNum2Bits(nBits);
+    strictNumUsed.in <== numUsed;
+    component ltBound = LessThan(nBits);
+    ltBound.in[0] <== numUsed;
+    ltBound.in[1] <== blockBytes;
+    ltBound.out === 1;
+    component strictByte[blockBytes];
+    component leq[blockBytes];
+    for (var i = 0; i < blockBytes; i++) {
+        strictByte[i] = StrictNum2Bits(8);
+        strictByte[i].in <== block[i];
+        leq[i] = LessEqThan(nBits);
+        leq[i].in[0] <== numUsed;
+        leq[i].in[1] <== i;
+        leq[i].out * (block[i] - (blockBytes - numUsed)) === 0;
+    }
+}

@@ -9,8 +9,8 @@ pragma circom 2.0.0;
  * @custom:input R Right value.
  * @custom:output outL L or R according to sel.
  * @custom:output outR R or L according to sel.
- * @custom:complexity 2 constraints. sel should be 0 or 1 (enforced in Merkle usage via pathIndices).
- * @custom:security Used internally in Merkle path; pathIndices constrain sel to binary.
+ * @custom:complexity 3 constraints (1 binary + 2 swap).
+ * @custom:security sel is constrained to {0, 1} within the template.
  */
 template Switcher() {
     signal input sel;
@@ -18,6 +18,7 @@ template Switcher() {
     signal input R;
     signal output outL;
     signal output outR;
+    sel * (sel - 1) === 0;
     signal aux;
     aux <== (R - L) * sel;
     outL <== aux + L;

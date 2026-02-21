@@ -4,11 +4,11 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Circom](https://img.shields.io/badge/Circom-ZK%20Circuits-8B5CF6)](https://docs.circom.io/)
-[![Tests](https://img.shields.io/badge/tests-128%2B%20passing-success)](./test)
+[![Tests](https://img.shields.io/badge/tests-138%2B%20passing-success)](./test)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.x-brightgreen)](https://nodejs.org/)
 [![No circomlib](https://img.shields.io/badge/deps-no%20circomlib-informational)](./circuits)
 
-Reusable Circom ZK circuit templates: hashing, comparators, Merkle trees, nullifiers, and utilities. No dependency on circomlib.
+Reusable Circom ZK circuit templates: hashing (Poseidon, MiMC, SHA-256), comparators, Merkle trees, nullifiers, voting, and utilities. No dependency on circomlib. Internal security audit applied in 0.5.0.
 
 ## Use in your project
 
@@ -54,7 +54,7 @@ From npm:
 npm install opencircom
 ```
 
-Or add to your `package.json`: `"opencircom": "^0.4.0"`.
+Or add to your `package.json`: `"opencircom": "^0.5.0"`.
 
 ### Hardhat
 
@@ -117,40 +117,49 @@ Output is written to **docs/** (see [docs/README.md](./docs/README.md) after gen
 | Utils      | `MinN(n, N)`, `MaxN(n, N)` | Minimum / maximum of an array of N n-bit values. |
 | Utils      | `AllEqual(n)`, `CountMatches(N)` | 1 if all array elements equal; count of arr[i]==value. |
 | Utils      | `Tally(numChoices, numVotes)` | Vote counts per choice (votes in [0, numChoices−1]); for anonymous tally. |
+| Utils      | `PadBits10Star(n, totalBits)` | Pad bits with 1 then zeros (hash-style padding). |
+| Utils      | `PadPKCS7(blockBytes)` | PKCS#7-style padding: bytes from numUsed to end equal (blockBytes − numUsed); for hashing/symmetric crypto. |
+| Utils      | `ConditionalSelect()` | Private if-then-else: out = condition ? a : b (condition 0/1). |
+| Utils      | `BalanceProof(n)` | Prove balance ≥ amount and newBalance = balance − amount; for transfer proofs. |
+| Utils      | `VoteInAllowlist(n)` | 1 if vote in allowedChoices (allowlist voting). |
 | Merkle    | `MerkleInclusionProof(levels)` | Binary Merkle inclusion. |
+| Merkle    | `AllowlistMembership(levels)` | Prove identity in allowlist (Poseidon(1)(identity) + Merkle path); use with nullifier on-chain. |
 | Merkle    | `SparseMerkleInclusion(levels)`, `SparseMerkleExclusion(levels)` | Sparse Merkle: prove leaf at key equals value, or is empty. |
 | Merkle    | `IncrementalMerkleInclusion(levels)` | Append-only tree: prove leaf at numeric index. |
 | Merkle    | `MerkleUpdateProof(levels)` | Prove old root → new root by changing one leaf on the same path. |
 | Identity  | `Nullifier(domainSize)`  | Nullifier hash for double-spend prevention. |
-| Voting    | `VoteCommit(numChoices)`, `VoteReveal()` | Commit-reveal (commit phase + reveal with ZK), anonymous 1-of-N vote, tally verification, double-vote prevention (nullifier-based). |
+| Voting    | `VoteCommit(numChoices)`, `VoteCommitAllowlist(n)`, `VoteReveal()` | Commit-reveal; allowlist variant constrains choice to allowedChoices[n]; double-vote prevention (nullifier-based). |
 
-## Circuits (implemented)
+## Implemented (roadmap coverage)
 
-Roadmap areas fully covered:
+- **Arithmetic**: Sum(n), InnerProduct(n), DivRem(n) (safe div/rem, all operands range-checked), ExpByBits(n), AssertNotEqual().
+- **Set membership**: Merkle allowlist (`AllowlistMembership`), sparse Merkle inclusion/exclusion, incremental and update proofs.
+- **Payments**: Balance proof (`BalanceProof(n)` — balance ≥ amount, newBalance = balance − amount).
+- **Padding**: PadBits, PadBits10Star (1||0*), PadPKCS7 (block bytes).
+- **Voting**: Commit-reveal with nullifier, allowlist variant (`VoteCommitAllowlist`), tally (`Tally`).
 
-- **Arithmetic**: Sum(n), InnerProduct(n), DivRem(n) (safe division with remainder), ExpByBits(n) (field/modular-style exponentiation), AssertNotEqual() (aliasing-safe field checks).
+## Roadmap (potential additions)
 
-## Potential circuits to add (roadmap)
-
-Planned or community-requested templates (not yet implemented):
+Planned or community-requested; not yet implemented:
 
 - **Hashing**: Pedersen (Baby Jubjub), Keccak-256.
 - **Signatures**: EdDSA verify (Baby JubJub), ECDSA verify (secp256k1).
-- **Encryption**: ElGamal encrypt/decrypt, ECDH shared secret, symmetric (Poseidon-based).
-- **Identity & credentials**: Semaphore-style identity commitment, selective attribute disclosure, age/threshold proof (attribute > N without revealing).
-- **Set membership**: Merkle-based allowlist, non-membership proof (sparse Merkle), accumulator-based membership.
-- **Payments & finance**: Balance proof (balance ≥ amount without revealing), confidential transfer, mixer (deposit/withdraw).
-- **String & data**: Regex matching (in-circuit), JSON field extraction, UTF-8 validation, substring search.
-- **Utilities**: PKCS padding.
+- **Encryption**: ElGamal, ECDH shared secret, symmetric (Poseidon-based).
+- **Identity & credentials**: Semaphore-style commitment, selective disclosure, age/threshold proof.
+- **Set membership**: Accumulator-based membership (Merkle/sparse already done).
+- **Payments**: Confidential transfer, mixer (deposit/withdraw).
+- **String & data**: Regex (in-circuit), JSON field extraction, UTF-8 validation.
+- **Utilities**: Other padding or encoding schemes.
 
 Contributions welcome; open an issue to propose or prioritize.
 
 ## Security
 
-- **Range checks**: Use `LessThan(n)` with `n` large enough for your values; combine with `Num2Bits` when you need strict field bounds.
-- **Merkle**: Enforce `pathIndices[i]` binary (circuit does this).
+- **Range checks**: Use `StrictNum2Bits(n)` or `RangeProof(n)` for untrusted inputs; `LessThan(n)` assumes inputs &lt; 2^n.
+- **Merkle**: `pathIndices[i]` are constrained binary in-circuit; `Switcher` constrains `sel` to {0,1}.
 - **Nullifier**: Use a unique `externalNullifier` per action to avoid cross-action replay.
-- **Hashing**: Poseidon uses standard Hades parameters (same as circomlib spec); constants are in `circuits/hashing/poseidon_constants.circom`.
+- **Hashing**: Poseidon uses standard Hades parameters (same as circomlib); constants in `circuits/hashing/poseidon_constants.circom`.
+- **Audit**: An internal security audit (0.5.0) fixed binary constraints and range checks in Switcher, ForceEqualIfEnabled, IncrementalMerkleInclusion, DivRem, and PadPKCS7. See [CHANGELOG](CHANGELOG) for details.
 
 See [SECURITY.md](SECURITY.md) for more.
 
@@ -158,7 +167,7 @@ See [SECURITY.md](SECURITY.md) for more.
 
 Tests use **real** ZK where applicable: circuits are compiled with Circom, then a small Powers of Tau and zkey are generated, and a Groth16 proof is created and verified with snarkjs (no mocks).
 
-**Coverage** (128+ tests): Poseidon, SHA-256, Comparators (incl. StrictNum2Bits, RangeProof, AssertNotEqual), Gates, Bitify, Merkle (inclusion, sparse, incremental, update), MiMC, Mux1/Mux2, MuxN (SelectByIndex), Arithmetic (Sum, InnerProduct, DivRem, ExpByBits), Utils (PadBits, OneOfN, IndexOf, Min2, Max2, MinN, MaxN, AllEqual, CountMatches, Tally), Switcher, Nullifier, Voting, and one full Groth16 prove/verify.
+**Coverage** (138+ tests): Poseidon, SHA-256, Comparators, Gates, Bitify, Merkle (inclusion, AllowlistMembership, sparse, incremental, update), MiMC, Mux1/Mux2, MuxN, Arithmetic, Utils (PadBits, PadBits10Star, PadPKCS7, OneOfN, IndexOf, Min2, Max2, MinN, MaxN, AllEqual, CountMatches, Tally, ConditionalSelect, BalanceProof, VoteInAllowlist), Switcher, VoteCommitAllowlist, Nullifier, Voting, and one full Groth16 prove/verify.
 
 ```bash
 npm install

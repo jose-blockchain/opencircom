@@ -90,13 +90,14 @@ template IsEqual() {
 /**
  * @title ForceEqualIfEnabled
  * @notice If enabled is 1, constrains in[0] == in[1]; if 0, no constraint.
- * @dev (1 - IsZero(in[1]-in[0])) * enabled === 0.
- * @custom:input enabled 0 or 1 to enable the equality constraint.
+ * @dev enabled constrained binary; (1 - IsZero(in[1]-in[0])) * enabled === 0.
+ * @custom:input enabled 0 or 1 (binary-constrained) to enable the equality check.
  * @custom:input in[2] Two values; must be equal when enabled.
  */
 template ForceEqualIfEnabled() {
     signal input enabled;
     signal input in[2];
+    enabled * (enabled - 1) === 0;
     component isz = IsZero();
     in[1] - in[0] ==> isz.in;
     (1 - isz.out) * enabled === 0;

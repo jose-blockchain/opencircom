@@ -36,4 +36,11 @@ circom test/circuits/index_of_test.circom --r1cs --wasm -o build -l circuits
 circom test/circuits/minmax_allequal_count_test.circom --r1cs --wasm -o build -l circuits
 circom test/circuits/minn_maxn_test.circom --r1cs --wasm -o build -l circuits
 circom test/circuits/tally_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/allowlist_membership_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/pad_bits_10star_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/conditional_select_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/balance_proof_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/vote_in_allowlist_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/pad_pkcs7_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/vote_commit_allowlist_test.circom --r1cs --wasm -o build -l circuits
 echo "Done."

@@ -15,6 +15,7 @@ async function poseidon4(poseidon4Circuit, choice, revealIdentity, salt, ballotI
 
 describe("Voting (commit-reveal, nullifier)", function () {
   let commitCircuit;
+  let commitAllowlistCircuit;
   let revealCircuit;
   let poseidon4Circuit;
   this.timeout(60000);
@@ -23,6 +24,10 @@ describe("Voting (commit-reveal, nullifier)", function () {
     const opts = { output: path.join(__dirname, "..", "build"), recompile: false };
     commitCircuit = await wasm_tester(
       path.join(__dirname, "circuits", "voting_commit_test.circom"),
+      opts
+    );
+    commitAllowlistCircuit = await wasm_tester(
+      path.join(__dirname, "circuits", "vote_commit_allowlist_test.circom"),
       opts
     );
     revealCircuit = await wasm_tester(
@@ -64,6 +69,20 @@ describe("Voting (commit-reveal, nullifier)", function () {
       } catch (e) {
         assert.isOk(e);
       }
+    });
+
+    it("VoteCommitAllowlist: choice in allowedChoices and commitment matches", async () => {
+      const allowedChoices = [1, 3, 5];
+      const choice = 3;
+      const revealIdentity = 111;
+      const salt = 222;
+      const ballotId = 7;
+      const commitment = await poseidon4(poseidon4Circuit, choice, revealIdentity, salt, ballotId);
+      const w = await commitAllowlistCircuit.calculateWitness(
+        { choice, allowedChoices, revealIdentity, salt, ballotId, commitment },
+        true
+      );
+      await commitAllowlistCircuit.checkConstraints(w);
     });
 
     it("fails when choice >= numChoices", async () => {

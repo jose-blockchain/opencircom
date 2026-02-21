@@ -3,6 +3,7 @@ pragma circom 2.0.0;
 include "../hashing/poseidon.circom";
 include "../switcher.circom";
 include "../bitify.circom";
+include "../comparators.circom";
 
 /**
  * @title MerkleInclusionProof
@@ -24,7 +25,6 @@ template MerkleInclusionProof(levels) {
 
     component hashers[levels + 1];
     component switchers[levels];
-    component muxes[levels];
 
     hashers[0] = Poseidon(1);
     hashers[0].inputs[0] <== leaf;
@@ -96,7 +96,7 @@ template SparseMerkleExclusion(levels) {
 /**
  * @title IncrementalMerkleInclusion
  * @notice Proves leaf at numeric index is in an append-only Merkle tree.
- * @dev pathIndices are derived from index (Num2Bits). Use for deposit-style trees where index is insertion order.
+ * @dev pathIndices derived from index via StrictNum2Bits (index range-checked to [0, 2^levels)). Use for deposit-style trees.
  * @param levels Tree depth.
  * @custom:input leaf Leaf value.
  * @custom:input index Numeric index of the leaf.
@@ -108,7 +108,7 @@ template IncrementalMerkleInclusion(levels) {
     signal input index;
     signal input pathElements[levels];
     signal output root;
-    component n2b = Num2Bits(levels);
+    component n2b = StrictNum2Bits(levels);
     n2b.in <== index;
     component incl = MerkleInclusionProof(levels);
     incl.leaf <== leaf;
@@ -173,4 +173,29 @@ template Nullifier(domainSize) {
     h.inputs[0] <== secret;
     h.inputs[1] <== externalNullifier;
     nullifierHash <== h.out;
+}
+
+/**
+ * @title AllowlistMembership
+ * @notice Proves identity is in a Merkle allowlist: hashes identity to leaf, proves inclusion.
+ * @dev Use with Nullifier in contracts to prevent double-use (verify proof + check nullifier not used).
+ * @param levels Tree depth.
+ * @custom:input identity Private identity (e.g. commitment or leaf preimage).
+ * @custom:input pathElements[levels] pathIndices[levels] Merkle path.
+ * @custom:output root Tree root (match on-chain).
+ */
+template AllowlistMembership(levels) {
+    signal input identity;
+    signal input pathElements[levels];
+    signal input pathIndices[levels];
+    signal output root;
+    component h = Poseidon(1);
+    h.inputs[0] <== identity;
+    component tree = MerkleInclusionProof(levels);
+    tree.leaf <== h.out;
+    for (var i = 0; i < levels; i++) {
+        tree.pathElements[i] <== pathElements[i];
+        tree.pathIndices[i] <== pathIndices[i];
+    }
+    root <== tree.root;
 }

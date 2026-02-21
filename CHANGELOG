@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.5.0
+
+- Merkle: AllowlistMembership(levels) — prove identity in allowlist (hash + Merkle path); pair with nullifier on-chain
+- Utils: PadBits10Star(n, totalBits) — pad with 1 then zeros (hash padding)
+- Utils: ConditionalSelect() — private if-then-else (condition ? a : b)
+- Utils: BalanceProof(n) — prove balance ≥ amount and newBalance = balance − amount; for transfer proofs
+- Utils: VoteInAllowlist(n) — 1 if vote in allowed choices (allowlist voting)
+- Utils: PadPKCS7(blockBytes) — PKCS#7-style padding for block bytes; for hashing/symmetric crypto in-circuit
+- Voting: VoteCommitAllowlist(n) — commit phase with choice in allowedChoices[n]; use with VoteReveal for 1-of-N allowlist voting
+- Tests: 138+ passing (PadPKCS7, VoteCommitAllowlist, and existing substantial circuits)
+- Docs/README: badge 138+ tests; `npm run docs` generates API docs for all templates (including PadPKCS7, VoteCommitAllowlist)
+- Internal security audit (all circuits reviewed, fixes applied, re-audited):
+  - [HIGH] Switcher: added binary constraint on sel (was unconstrained; safe in Merkle context but not standalone)
+  - [HIGH] ForceEqualIfEnabled: added binary constraint on enabled
+  - [HIGH] IncrementalMerkleInclusion: replaced Num2Bits with StrictNum2Bits for index (prevents field-overflow bypass)
+  - [MEDIUM] MerkleInclusionProof: removed unused muxes[] declaration (dead code)
+  - [MEDIUM] DivRem: added StrictNum2Bits range check on dividend a (was unchecked; b, q, r were already checked)
+  - [MEDIUM] PadPKCS7: enforced numUsed < blockBytes (at least 1 pad byte, per PKCS#7 spec)
+  - [LOW/INFO] Gates, Mux1/Mux2, Bits2Num: inputs not binary-constrained by design (documented building blocks)
+  - [INFO] Nullifier domainSize unused (API compat, documented)
+  - All 138 tests pass after fixes
+
 ## 0.4.0
 
 - Utils: IndexOf(N, nBits) — prove index where arr[i] == value
