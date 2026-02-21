@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0
+
+- Arithmetic: PoEVerify(n) — SNARK-friendly proof-of-exponentiation verification (constrains result = base^exponent in the field; n-bit exponent, no big-int); for field-based accumulators (e.g. witness^element = A). 14 dedicated tests (edge cases, max exponent, 0^0, 1^exp, failure cases).
+- Hashing: PoseidonEncrypt() — symmetric encryption: ciphertext = plaintext + Poseidon(key); decryption off-chain (plaintext = ciphertext − Poseidon(key)). One Poseidon(1) per encrypt; use unique key per message or key+nonce. 6 tests.
+- Identity & credentials: IdentityCommitment() — Semaphore-style commitment = Poseidon(identity, secret). SemaphoreMembership(levels) — prove (identity, secret) in allowlist tree (leaves = Poseidon(1)(commitment)); use with Nullifier for double-signaling prevention. 5 tests.
+- Set membership: AccumulatorMembership(n) — field-based accumulator membership: constrains witness^member = accumulator (wraps PoEVerify). Build A = g^(product of set elements); witness for element e is g^(product/e). 5 tests.
+- String & data: Utf8Validation(n) — validate byte sequence as UTF-8 (state machine, quadratic-only); FixedStringMatch(n) — bytes equal expected; BytesAllInRange(n, lo, hi), ByteInRange(lo, hi) — digits/ASCII range. 9 tests.
+- Test suite expanded across all circuits: 253+ tests (incl. string_data Utf8Validation, FixedStringMatch, BytesAllInRange; PoseidonEncrypt, IdentityCommitment, SemaphoreMembership, AccumulatorMembership; arithmetic, comparators, bitify, divrem, exp, gates, merkle, mimc, mux, muxn, nullifier, poseidon, range/strict, sha256, switcher, utils, substantial circuits, voting). Edge cases, failure paths, and boundary conditions covered.
+
 ## 0.5.0
 
 - Merkle: AllowlistMembership(levels) — prove identity in allowlist (hash + Merkle path); pair with nullifier on-chain
@@ -21,6 +30,7 @@
   - [LOW/INFO] Gates, Mux1/Mux2, Bits2Num: inputs not binary-constrained by design (documented building blocks)
   - [INFO] Nullifier domainSize unused (API compat, documented)
   - All 138 tests pass after fixes
+
 
 ## 0.4.0
 

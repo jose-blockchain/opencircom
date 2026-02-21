@@ -27,7 +27,7 @@ const ROOT = path.join(__dirname, "..");
 const CIRCUITS_DIR = path.join(ROOT, "circuits");
 const DOCS_DIR = path.join(ROOT, "docs");
 
-const CATEGORY_ORDER = ["arithmetic", "comparators", "bitify", "gates", "mux", "utils", "hashing", "merkle", "voting"];
+const CATEGORY_ORDER = ["arithmetic", "comparators", "bitify", "gates", "mux", "utils", "string_data", "hashing", "merkle", "voting"];
 const CATEGORY_TITLES = {
   arithmetic: "Arithmetic",
   comparators: "Comparators & range",
@@ -35,6 +35,7 @@ const CATEGORY_TITLES = {
   gates: "Gates",
   mux: "Mux & select",
   utils: "Utils",
+  string_data: "String & data",
   hashing: "Hashing",
   merkle: "Merkle",
   voting: "Voting",
@@ -69,6 +70,7 @@ function getCategory(relPath) {
   if (name === "bitify") return "bitify";
   if (name === "gates") return "gates";
   if (name === "utils") return "utils";
+  if (name === "string_data") return "string_data";
   return "other";
 }
 

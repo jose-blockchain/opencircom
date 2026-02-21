@@ -43,4 +43,13 @@ circom test/circuits/balance_proof_test.circom --r1cs --wasm -o build -l circuit
 circom test/circuits/vote_in_allowlist_test.circom --r1cs --wasm -o build -l circuits
 circom test/circuits/pad_pkcs7_test.circom --r1cs --wasm -o build -l circuits
 circom test/circuits/vote_commit_allowlist_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/poe_verify_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/poseidon1_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/poseidon_encrypt_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/identity_commitment_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/semaphore_membership_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/accumulator_membership_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/utf8_validation_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/fixed_string_match_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/bytes_all_in_range_test.circom --r1cs --wasm -o build -l circuits
 echo "Done."
