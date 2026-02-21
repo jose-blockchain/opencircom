@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Circom](https://img.shields.io/badge/Circom-ZK%20Circuits-8B5CF6)](https://docs.circom.io/)
-[![Tests](https://img.shields.io/badge/tests-108%2B%20passing-success)](./test)
+[![Tests](https://img.shields.io/badge/tests-128%2B%20passing-success)](./test)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.x-brightgreen)](https://nodejs.org/)
 [![No circomlib](https://img.shields.io/badge/deps-no%20circomlib-informational)](./circuits)
 
@@ -54,7 +54,7 @@ From npm:
 npm install opencircom
 ```
 
-Or add to your `package.json`: `"opencircom": "^0.3.0"`.
+Or add to your `package.json`: `"opencircom": "^0.4.0"`.
 
 ### Hardhat
 
@@ -90,7 +90,13 @@ Use them to jump-start a project without configuring the toolchain from scratch.
 
 ## Documentation
 
-Generated API-style docs for each circuit category and template: **[docs/](./docs/README.md)**. Build with `npm run docs` (parses OpenZeppelin-style `@title`, `@notice`, `@dev`, `@param`, `@custom:input`, `@custom:output` block comments in the circuits).
+API-style docs for each circuit category and template are **generated** (not committed). To build them:
+
+```bash
+npm run docs
+```
+
+Output is written to **docs/** (see [docs/README.md](./docs/README.md) after generation). The script parses OpenZeppelin-style `@title`, `@notice`, `@dev`, `@param`, `@custom:input`, `@custom:output` block comments in the circuit files.
 
 ## Circuits
 
@@ -106,7 +112,11 @@ Generated API-style docs for each circuit category and template: **[docs/](./doc
 | Gates     | `AND`, `OR`, `NOT`, `XOR`, `MultiAND(n)` | Boolean gates. |
 | Utils     | `Mux1`, `Mux2`, `MuxN` / `SelectByIndex(N, nBits)`, `Switcher` | Multiplexer and conditional swap; N-way select by index. |
 | Arithmetic | `Sum(n)`, `InnerProduct(n)`, `DivRem(n)`, `ExpByBits(n)` | Sum, dot product; safe div/rem; field exponentiation (exp as bits). |
-| Utils      | `PadBits(n, target)`, `OneOfN(n)` | Zero-pad bit array to length; 1 if value in array. |
+| Utils      | `PadBits(n, target)`, `OneOfN(n)`, `IndexOf(N, nBits)` | Zero-pad bits; 1 if value in array; prove index where arr[i]==value. |
+| Utils      | `Min2(n)`, `Max2(n)` | Minimum / maximum of two n-bit values. |
+| Utils      | `MinN(n, N)`, `MaxN(n, N)` | Minimum / maximum of an array of N n-bit values. |
+| Utils      | `AllEqual(n)`, `CountMatches(N)` | 1 if all array elements equal; count of arr[i]==value. |
+| Utils      | `Tally(numChoices, numVotes)` | Vote counts per choice (votes in [0, numChoices−1]); for anonymous tally. |
 | Merkle    | `MerkleInclusionProof(levels)` | Binary Merkle inclusion. |
 | Merkle    | `SparseMerkleInclusion(levels)`, `SparseMerkleExclusion(levels)` | Sparse Merkle: prove leaf at key equals value, or is empty. |
 | Merkle    | `IncrementalMerkleInclusion(levels)` | Append-only tree: prove leaf at numeric index. |
@@ -126,14 +136,12 @@ Planned or community-requested templates (not yet implemented):
 
 - **Hashing**: Pedersen (Baby Jubjub), Keccak-256.
 - **Signatures**: EdDSA verify (Baby JubJub), ECDSA verify (secp256k1).
-- **Merkle**: (Sparse inclusion/exclusion, incremental, update proof are implemented.)
-- **Comparators & range**: (Range proof and StrictNum2Bits are implemented.)
 - **Encryption**: ElGamal encrypt/decrypt, ECDH shared secret, symmetric (Poseidon-based).
 - **Identity & credentials**: Semaphore-style identity commitment, selective attribute disclosure, age/threshold proof (attribute > N without revealing).
 - **Set membership**: Merkle-based allowlist, non-membership proof (sparse Merkle), accumulator-based membership.
 - **Payments & finance**: Balance proof (balance ≥ amount without revealing), confidential transfer, mixer (deposit/withdraw).
 - **String & data**: Regex matching (in-circuit), JSON field extraction, UTF-8 validation, substring search.
-- **Utilities**: (MuxN/SelectByIndex, OneOfN/array contains, PadBits/zero-pad implemented.) Index of, PKCS padding.
+- **Utilities**: PKCS padding.
 
 Contributions welcome; open an issue to propose or prioritize.
 
@@ -150,7 +158,7 @@ See [SECURITY.md](SECURITY.md) for more.
 
 Tests use **real** ZK where applicable: circuits are compiled with Circom, then a small Powers of Tau and zkey are generated, and a Groth16 proof is created and verified with snarkjs (no mocks).
 
-**Coverage** (108+ tests): Poseidon, SHA-256, Comparators (incl. StrictNum2Bits, RangeProof, AssertNotEqual), Gates, Bitify, Merkle (inclusion, sparse, incremental, update), MiMC, Mux1/Mux2, MuxN (SelectByIndex), Arithmetic (Sum, InnerProduct, DivRem, ExpByBits), Utils (PadBits, OneOfN), Switcher, Nullifier, Voting, and one full Groth16 prove/verify.
+**Coverage** (128+ tests): Poseidon, SHA-256, Comparators (incl. StrictNum2Bits, RangeProof, AssertNotEqual), Gates, Bitify, Merkle (inclusion, sparse, incremental, update), MiMC, Mux1/Mux2, MuxN (SelectByIndex), Arithmetic (Sum, InnerProduct, DivRem, ExpByBits), Utils (PadBits, OneOfN, IndexOf, Min2, Max2, MinN, MaxN, AllEqual, CountMatches, Tally), Switcher, Nullifier, Voting, and one full Groth16 prove/verify.
 
 ```bash
 npm install

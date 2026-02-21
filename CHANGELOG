@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0
+
+- Utils: IndexOf(N, nBits) — prove index where arr[i] == value
+- Utils: Min2(n), Max2(n) — min/max of two n-bit values
+- Utils: MinN(n, N), MaxN(n, N) — min/max of an array of N values
+- Utils: AllEqual(n) — 1 if all array elements equal
+- Utils: CountMatches(N) — count of arr[i] == value
+- Utils: Tally(numChoices, numVotes) — vote counts per choice (votes range-checked)
+- Docs: API-style generated docs (npm run docs) for circuit categories and templates; see docs/README.md
+- Tests: 128+ passing (index_of, minmax, minn_maxn, tally test circuits)
+
 ## 0.3.0
 
 - Arithmetic: Sum(n), InnerProduct(n), DivRem(n), ExpByBits(n) — sum, dot product, safe div/rem, field exponentiation

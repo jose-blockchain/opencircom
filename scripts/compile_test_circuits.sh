@@ -32,4 +32,8 @@ circom test/circuits/divrem_test.circom --r1cs --wasm -o build -l circuits
 circom test/circuits/utils_test.circom --r1cs --wasm -o build -l circuits
 circom test/circuits/exp_test.circom --r1cs --wasm -o build -l circuits
 circom test/circuits/assert_not_equal_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/index_of_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/minmax_allequal_count_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/minn_maxn_test.circom --r1cs --wasm -o build -l circuits
+circom test/circuits/tally_test.circom --r1cs --wasm -o build -l circuits
 echo "Done."
